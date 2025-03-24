@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:intl/intl.dart';
 import 'home_page.dart';
+
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
@@ -11,6 +14,7 @@ class MyApp extends StatelessWidget {
     const appTitle = 'Form Validation Demo';
     return MaterialApp(
       title: appTitle,
+      theme: ThemeData(primarySwatch: Colors.blue),
       home: Scaffold(
         appBar: AppBar(
           title: const Text(appTitle),
@@ -29,22 +33,13 @@ class SignupPage extends StatefulWidget {
 }
 
 class SignupPageState extends State<SignupPage> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _dobController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormBuilderState>();
 
   void _submitForm() {
-    if (_formKey.currentState!.validate()) {
+    if (_formKey.currentState?.saveAndValidate() ?? false) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Signup Successful!')),
       );
-
-      _nameController.clear();
-      _emailController.clear();
-      _dobController.clear();
-      _passwordController.clear();
 
       Navigator.push(
         context,
@@ -59,48 +54,44 @@ class SignupPageState extends State<SignupPage> {
       appBar: AppBar(title: const Text('Signup Form')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
+        child: FormBuilder(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextFormField(
-                controller: _nameController,
+              FormBuilderTextField(
+                name: 'name',
                 decoration: const InputDecoration(labelText: "Name"),
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Please enter your name'
-                    : null,
+                validator: FormBuilderValidators.required(),
               ),
-              TextFormField(
-                controller: _emailController,
+              const SizedBox(height: 10),
+              FormBuilderTextField(
+                name: 'email',
                 decoration: const InputDecoration(labelText: "Email"),
-                validator: (value) {
-                  if (value == null || value.isEmpty)
-                    return 'Please enter an email';
-                  if (!RegExp(
-                          r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')
-                      .hasMatch(value)) {
-                    return 'Enter a valid email';
-                  }
-                  return null;
-                },
+                validator: FormBuilderValidators.compose([
+                  FormBuilderValidators.required(),
+                  FormBuilderValidators.email(),
+                ]),
               ),
-              TextFormField(
-                controller: _dobController,
+              const SizedBox(height: 10),
+              FormBuilderDateTimePicker(
+                name: 'dob',
                 decoration: const InputDecoration(labelText: "Date of Birth"),
-                keyboardType: TextInputType.datetime,
+                inputType: InputType.date,
+                format: DateFormat("MM/dd/yyyy"),
+                lastDate: DateTime.now(),
+                validator: FormBuilderValidators.required(),
               ),
-              TextFormField(
-                controller: _passwordController,
+              const SizedBox(height: 10),
+              FormBuilderTextField(
+                name: 'password',
                 decoration: const InputDecoration(labelText: "Password"),
                 obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty)
-                    return 'Please enter a password';
-                  if (value.length < 8)
-                    return 'Password must be at least 8 characters';
-                  return null;
-                },
+                validator: FormBuilderValidators.compose([
+                  FormBuilderValidators.required(),
+                  FormBuilderValidators.minLength(8,
+                      errorText: 'Password must be at least 8 characters'),
+                ]),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
