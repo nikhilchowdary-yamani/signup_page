@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'home_page.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
@@ -34,6 +35,24 @@ class SignupPageState extends State<SignupPage> {
   final TextEditingController _dobController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  void _submitForm() {
+    if (_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Signup Successful!')),
+      );
+
+      _nameController.clear();
+      _emailController.clear();
+      _dobController.clear();
+      _passwordController.clear();
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,14 +67,19 @@ class SignupPageState extends State<SignupPage> {
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(labelText: "Name"),
-                validator: (value) => value == null || value.isEmpty ? 'Please enter your name' : null,
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Please enter your name'
+                    : null,
               ),
               TextFormField(
                 controller: _emailController,
                 decoration: const InputDecoration(labelText: "Email"),
                 validator: (value) {
-                  if (value == null || value.isEmpty) return 'Please enter an email';
-                  if (!RegExp(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$').hasMatch(value)) {
+                  if (value == null || value.isEmpty)
+                    return 'Please enter an email';
+                  if (!RegExp(
+                          r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')
+                      .hasMatch(value)) {
                     return 'Enter a valid email';
                   }
                   return null;
@@ -71,20 +95,16 @@ class SignupPageState extends State<SignupPage> {
                 decoration: const InputDecoration(labelText: "Password"),
                 obscureText: true,
                 validator: (value) {
-                  if (value == null || value.isEmpty) return 'Please enter a password';
-                  if (value.length < 8) return 'Password must be at least 8 characters';
+                  if (value == null || value.isEmpty)
+                    return 'Please enter a password';
+                  if (value.length < 8)
+                    return 'Password must be at least 8 characters';
                   return null;
                 },
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Processing Data')),
-                    );
-                  }
-                },
+                onPressed: _submitForm,
                 child: const Text('Sign Up'),
               ),
             ],
